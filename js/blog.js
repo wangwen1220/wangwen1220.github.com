@@ -17,11 +17,11 @@ $(function() {
         activeOverlay: false, // Set CSS color to display scrollUp active point, e.g '#00FFFF'
     });
 	//ceshi
- 
+
     var blog = {};
     blog.views = {};
     blog.helper = {};
- 
+
 
     blog.helper.build_main_model = function(data) {
         var result = {};
@@ -50,7 +50,7 @@ $(function() {
         result.months = _.groupBy(articles, function(article) {
             return article.file.substring(0, 7);
         });
-        
+
         result.months = _.map(result.months, function(value, key) {
             return {
                 month: key,
@@ -62,7 +62,6 @@ $(function() {
                 })
             };
         });
-
         return result;
     };
 
@@ -79,7 +78,7 @@ $(function() {
         var pagecounts = Math.ceil(articles.length/10);
         for (var i = 1; i <= pagecounts; i++) {
 
-            pages[i] = {"num":i} ; 
+            pages[i] = {"num":i} ;
         };
 
         result.pages = pages;
@@ -87,7 +86,7 @@ $(function() {
         result.num_up = pagenum-1<=0?1:pagenum-1;
 
         result.num_next = parseInt(pagenum)+1>pagecounts?pagecounts:parseInt(pagenum)+1;
-        
+
         return result;
 
     }
@@ -123,81 +122,81 @@ $(function() {
             host = urls[0]+'show/';
             return host;
     }
-    
+
     // 转化引擎
     blog.helper.markdown = new Showdown.converter();
 
     // 增加多说评论
     blog.helper.addDiscuz = function (_div,file,title){
         var host = blog.helper.getHost();
-        
+
         var el = document.createElement('div');//该div不需要设置class="ds-thread"
         el.setAttribute('data-thread-key', file);//必选参数
         el.setAttribute('data-url', file);//必选参数
         el.setAttribute('data-title', title);//必选参数
-        
+
         el.setAttribute('data-author-key', 'hugcoday@gmail.com');//可选参数
         DUOSHUO.EmbedThread(el);
         _div.append(el);
-        
-         
+
+
     }
 
     // 评论列表
 
     blog.helper.addDiscuzList = function(_div){
 
-        var _discuz_title = document.createElement('h3'); 
+        var _discuz_title = document.createElement('h3');
         _discuz_title.innerHTML="最新评论";
         _div.append(_discuz_title);
 
-        var el = document.createElement('ul'); 
+        var el = document.createElement('ul');
         el.setAttribute('data-num-items', "10");
-        
-        el.setAttribute('data-excerpt-length',"70"); 
-        el.setAttribute('data-show-title', "0"); 
 
-        
+        el.setAttribute('data-excerpt-length',"70");
+        el.setAttribute('data-show-title', "0");
+
+
         DUOSHUO.RecentComments(el);
-    
+
         _div.append(el);
- 
-       
-         
+
+
+
     }
 
     //近期访客
     blog.helper.addDiscuzUsers = function(_div){
 
-        var _discuz_title = document.createElement('h3'); 
+        var _discuz_title = document.createElement('h3');
         _discuz_title.innerHTML="近期访客";
         _div.append(_discuz_title);
 
-        var el = document.createElement('ul'); 
+        var el = document.createElement('ul');
         el.setAttribute('data-num-items', "10");
-        el.setAttribute('data-excerpt-length',"70"); 
-        el.setAttribute('data-show-title', "0"); 
+        el.setAttribute('data-excerpt-length',"70");
+        el.setAttribute('data-show-title', "0");
 
-        
+
         DUOSHUO.RecentVisitors(el);
         _div.append(el);
- 
-       
-         
+
+
+
     }
 
     blog.helper.addpages = function(index,articles,_div){
-        var el = document.createElement('ul'); 
+        var el = document.createElement('ul');
         el.setAttribute('data-num-items', "10");
-        el.setAttribute('data-excerpt-length',"70"); 
-        el.setAttribute('data-show-title', "0"); 
+        el.setAttribute('data-excerpt-length',"70");
+        el.setAttribute('data-show-title', "0");
 
     }
 
-    
-  
 
-  
+
+
+
 
     //代码高亮
     blog.helper.highlight = function () {
@@ -214,7 +213,7 @@ $(function() {
         },
         render:function(){
             var html = Mustache.to_html(this.template, this.model);
-           
+
             $(this.el).append(html);
             return this;
         }
@@ -255,17 +254,17 @@ $(function() {
             blog.helper.highlight();
         }
     });
-    
-   
+
+
 
     blog.views.Main = Backbone.View.extend({
         el: $('.main-body'),
         template: $('#tpl-main').html(),
         initialize: function() {
-            
+
             _.bindAll(this, 'render');
             _.bindAll(this, 'sync');
-             
+
         },
         sync: function() {
             var that = this;
@@ -274,9 +273,9 @@ $(function() {
                 that.render();
             });
 
-            
+
         } ,
-        
+
         render: function() {
             if(!this.data) {
                 this.sync();
@@ -294,8 +293,8 @@ $(function() {
             });
             this.$(".sidebar-nav").empty().append(sidebar_view.render().el);
 
-            
-           
+
+
 
 
             if(this.cate) {
@@ -308,16 +307,16 @@ $(function() {
                 var article_view = new blog.views.Article({
                     article: this.article
                 });
-                
+
                 loadingIndex = false;
 
                 this.$(".article-content").empty().append(article_view.render().el);
-                 
+
                 //添加评论
                 blog.helper.addDiscuz(this.$(".article-content"),this.article,"");
-               
-              
-                 
+
+
+
             }
 
 
@@ -326,20 +325,20 @@ $(function() {
                 curIndex = 0;
                 hasShowedNum = 0;
                 loadingIndex = true;
-                 
+
                 blog.views.make_main_index(this.cate,this.data.articles,this.pagenum);
 
 
                 //页码工具条
                 var pagebar_model = blog.helper.build_pagebar_model(this.data, this.cate,this.pagenum);
-                
+
                 var pagebar_view = new blog.views.Pagebar({
                     model: pagebar_model
                 });
-               
+
                 this.$(".pagebar").empty().append(pagebar_view.render().el);
 
-                
+
 
             }
 
@@ -347,14 +346,14 @@ $(function() {
             blog.helper.addDiscuzList(this.$(".sidebar-comment"));
             blog.helper.addDiscuzUsers(this.$(".sidebar-users"));
 
-            
+
         }
     });
 
- 
 
 
-    
+
+
     //文章计数
     var curIndex = 0;
     var hasShowedNum = 0;
@@ -371,11 +370,11 @@ $(function() {
         this.curArticles = articles;
 
         if(loadingIndex){
-            
-             
-                
-                
-                
+
+
+
+
+
 
             if(curIndex<showArticleNum*(pagenum-1)){
                 curIndex = showArticleNum*(pagenum-1);
@@ -385,8 +384,8 @@ $(function() {
                 return ;
             }
 
-                
-               
+
+
 
 
             $.get("post/" + articles[curIndex].file + ".md", function(artData) {
@@ -398,14 +397,14 @@ $(function() {
                 } else {
                     html = blog.helper.markdown.makeHtml(artData);
                 }
-                
+
                 $(".article-content").append(html);
 
                 //添加继续阅读
                 $(".article-content").append("<br/>");
                 $(".article-content").append("<p><a title=\"\" class=\"btn btn-primary pull-left\" href=\"#show/" + articles[curIndex].file + "\"  onclick=\"\">继续阅读  →</a> </p><br/> <br/>");
                 $(".article-content").append("<div class=\"line_dashed\"></div>");
-                
+
                /* curIndex++;
                 if(curIndex < articles.length && curIndex < 10) {
                     addIndex(cate,articles);
@@ -417,13 +416,13 @@ $(function() {
                     hasShowedNum ++;
                     addIndex(cate,articles);
                 }
-                
+
 
             });
 
 
 
-                 
+
         }
     }
 
@@ -438,17 +437,17 @@ $(function() {
             if(!this.main) {
                 this.main = new blog.views.Main();
             }
-             
+
             this.main.cate = cate;
             this.main.article = article;
             this.main.pagenum = pagenum
             this.main.render();
-           
-             
+
+
         },
         index: function() {
             this.make_main_view(null, 'index',1);
-            
+
         },
         cate: function(cate) {
             this.make_main_view(cate, 'index',1);
